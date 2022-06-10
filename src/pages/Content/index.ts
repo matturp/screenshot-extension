@@ -116,6 +116,15 @@ window.addEventListener('mouseup', (event) => {
   }, 1);
 });
 
+window.addEventListener('takeScreenshot', () => {
+  const windowSize = { width: window.innerWidth, height: window.innerHeight };
+
+  chrome.runtime.sendMessage({
+    msg: 'FULL_SCREENSHOT',
+    windowSize,
+  });
+});
+
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     resetEverything();

@@ -2,6 +2,9 @@ import '../../assets/img/icon-34.png';
 import '../../assets/img/icon-128.png';
 import '../../assets/img/cross-32.png';
 import { defaults } from '../../shared/defaults';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc } from 'firebase/firestore/lite';
+
 // @ts-ignore
 import imageClipper from './image-clipper';
 
@@ -9,6 +12,20 @@ interface ImageDimension {
   w: number;
   h: number;
 }
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: 'AIzaSyCaoxJlCJ-8JHd-uKG_398KmmAmgDV7aMk',
+  authDomain: 'an-array-of-constraints.firebaseapp.com',
+  projectId: 'an-array-of-constraints',
+  storageBucket: 'an-array-of-constraints.appspot.com',
+  messagingSenderId: '851568643658',
+  appId: '1:851568643658:web:c98b783cceeb62dc5be0b3',
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const imageCollection = collection(db, 'images');
 
 chrome.storage.sync.set({ openInTab: defaults.openInTab });
 chrome.storage.sync.set({ download: defaults.download });
@@ -34,20 +51,17 @@ chrome.browserAction.onClicked.addListener(function () {
       return;
     }
     chrome.storage.sync.get(['download', 'openInTab'], (result) => {
-      // download image
-      if (result.download) {
-        chrome.downloads.download({
-          url: screenshotUrl,
-          filename: `${new Date().getTime().toString()}.jpg`,
-        });
-      }
+      chrome.downloads.download({
+        url: screenshotUrl,
+        filename: `${new Date().getTime().toString()}.jpg`,
+      });
 
       // see for yourself the screenshot during testing
-      if (result.openInTab) {
-        chrome.tabs.create({
-          url: screenshotUrl,
-        });
-      }
+      // if (result.openInTab) {
+      //   chrome.tabs.create({
+      //     url: screenshotUrl,
+      //   });
+      // }
     });
   });
 });
@@ -103,6 +117,49 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           });
         }
       );
+    });
+  }
+
+  if (request.msg === 'FULL_SCREENSHOT') {
+    // @ts-ignore
+    chrome.extension.getBackgroundPage().console.log('hello');
+    chrome.tabs.captureVisibleTab((screenshotUrl) => {
+      if (!screenshotUrl) {
+        return;
+      }
+
+      chrome.downloads.download({
+        url: screenshotUrl,
+        filename: `${new Date().getTime().toString()}.jpg`,
+      });
+
+      // @ts-ignore
+      chrome.extension.getBackgroundPage().console.log('adding doc');
+      addDoc(imageCollection, {
+        image: screenshotUrl,
+        date: new Date().toISOString(),
+      })
+        .then((thing) => {
+          // @ts-ignore
+          chrome.extension
+            .getBackgroundPage()
+            // @ts-ignore
+            .console.log('adding the thing', thing);
+          // @ts-ignore
+          chrome.extension.getBackgroundPage().console.error(thing);
+          // @ts-ignore
+          chrome.extension
+            .getBackgroundPage()
+            // @ts-ignore
+            .console.log('Document successfully written!');
+        })
+        .catch((error: any) => {
+          // @ts-ignore
+          chrome.extension
+            .getBackgroundPage()
+            // @ts-ignore
+            .console.error('Error writing document: ', error);
+        });
     });
   }
 });
