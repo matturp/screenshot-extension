@@ -15,7 +15,6 @@ interface ImageDimension {
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: 'AIzaSyCaoxJlCJ-8JHd-uKG_398KmmAmgDV7aMk',
   authDomain: 'an-array-of-constraints.firebaseapp.com',
   projectId: 'an-array-of-constraints',
   storageBucket: 'an-array-of-constraints.appspot.com',
