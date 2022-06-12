@@ -9,6 +9,7 @@ import { defaults } from '../../shared/defaults';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
+  apiKey: '', // Add your API key here, locally.
   authDomain: 'an-array-of-constraints.firebaseapp.com',
   projectId: 'an-array-of-constraints',
   storageBucket: 'an-array-of-constraints.appspot.com',
